@@ -2,23 +2,27 @@ package com.alok.mqtt.service;
 
 import com.alok.mqtt.config.Properties;
 import com.alok.mqtt.listener.MqttCallbackListener;
+import com.alok.mqtt.utils.CertUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
+
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Data
 public class MqttClientService {
 
     private IMqttClient mqttClient;
-    private MqttConnectOptions mqttConnectOptions;
     private MqttCallbackListener mqttCallbackListener;
 
     private Properties iotProperties;
 
     public void connect() throws MqttException {
+        MqttConnectOptions mqttConnectOptions = mqttClientConnectOptions();
         mqttClient = mqttClient();
         mqttCallbackListener.setMqttClientService(this);
+
         boolean connected = false;
         int retryCount = 0;
         int maxCount = iotProperties.getMqtt().getConnectionRetry();
@@ -75,4 +79,35 @@ public class MqttClientService {
 
         return mqttClient;
     }
+
+    private MqttConnectOptions mqttClientConnectOptions() {
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+        mqttConnectOptions.setCleanSession(iotProperties.getMqtt().getCleanState());
+        mqttConnectOptions.setAutomaticReconnect(iotProperties.getMqtt().getAutoReconnect());
+        mqttConnectOptions.setConnectionTimeout(iotProperties.getMqtt().getConnectionTimeout());
+        mqttConnectOptions.setKeepAliveInterval(iotProperties.getMqtt().getKeepAlive());
+        mqttConnectOptions.setWill(iotProperties.getMqtt().getStatusTopic(), offlineMessage(), 1, false);
+
+        mqttConnectOptions.setSSLProperties(sslClientProperties());
+
+        return mqttConnectOptions;
+    }
+
+    private java.util.Properties sslClientProperties() {
+
+        //valid properties are {"com.ibm.ssl.protocol", "com.ibm.ssl.contextProvider", "com.ibm.ssl.keyStore", "com.ibm.ssl.keyStorePassword", "com.ibm.ssl.keyStoreType", "com.ibm.ssl.keyStoreProvider", "com.ibm.ssl.keyManager", "com.ibm.ssl.trustStore", "com.ibm.ssl.trustStorePassword", "com.ibm.ssl.trustStoreType", "com.ibm.ssl.trustStoreProvider", "com.ibm.ssl.trustManager", "com.ibm.ssl.enabledCipherSuites", "com.ibm.ssl.clientAuthentication"};
+        java.util.Properties properties = new java.util.Properties();
+        properties.setProperty("com.ibm.ssl.keyStoreType", iotProperties.getSecure().getKeystoreType());
+        properties.setProperty("com.ibm.ssl.keyStore", CertUtils.getClientKeyStore(iotProperties.getSecure().getKeystoreFile()));
+        properties.setProperty("com.ibm.ssl.keyStorePassword", iotProperties.getSecure().getKeystorePassword());
+        properties.setProperty("com.ibm.ssl.trustStore", CertUtils.getClientTrustStore(iotProperties.getSecure().getTruststoreFile()));
+        properties.setProperty("com.ibm.ssl.trustStorePassword", iotProperties.getSecure().getTruststorePassword());
+        return properties;
+    }
+
+    private byte[] offlineMessage() {
+
+        return (iotProperties.getMqtt().getClientId() + "-OFFLINE").getBytes(StandardCharsets.UTF_8);
+    }
+
 }
