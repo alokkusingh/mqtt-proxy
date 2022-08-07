@@ -37,10 +37,11 @@ public class RequestProcessor {
 
     public ResponsePayload prepareMqttResponse(RequestPayload requestPayload, ResponseEntity<String> httpResponse) {
         requestPayload = Optional.ofNullable(requestPayload).orElse(new RequestPayload());
-        return ResponsePayload.builder()
-                .code(httpResponse.getStatusCodeValue())
-                .body(httpResponse.getBody())
-                .correlationId(requestPayload.getCorrelationId())
-                .build();
+        return new ResponsePayload(
+                httpResponse.getStatusCodeValue(),
+                httpResponse.getBody(),
+                null,
+                requestPayload.getCorrelationId()
+        );
     }
 }

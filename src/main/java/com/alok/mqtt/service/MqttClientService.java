@@ -2,6 +2,8 @@ package com.alok.mqtt.service;
 
 import com.alok.mqtt.config.Properties;
 import com.alok.mqtt.listener.MqttCallbackListener;
+import com.alok.mqtt.payload.RequestPayload;
+import com.alok.mqtt.payload.ResponsePayload;
 import com.alok.mqtt.utils.CertUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +65,24 @@ public class MqttClientService {
         }
     }
 
-    public void publish(final MqttMessage message) throws MqttException {
-        mqttClient.publish( iotProperties.getMqtt().getPublishTopic(), message );
+    public void publish(final ResponsePayload responsePayload) throws MqttException {
+        MqttMessage mqttResponseMessage = new MqttMessage();
+        mqttResponseMessage.setQos(1);
+        // AWS IoT Core doesn't support retained=true
+        mqttResponseMessage.setRetained(false);
+        mqttResponseMessage.setPayload(responsePayload.toString().getBytes(StandardCharsets.UTF_8));
+
+        mqttClient.publish( iotProperties.getMqtt().getPublishTopic(), mqttResponseMessage );
+    }
+
+    public void publish(final RequestPayload requestPayload) throws MqttException {
+        MqttMessage mqttResponseMessage = new MqttMessage();
+        mqttResponseMessage.setQos(1);
+        // AWS IoT Core doesn't support retained=true
+        mqttResponseMessage.setRetained(false);
+        mqttResponseMessage.setPayload(requestPayload.toString().getBytes(StandardCharsets.UTF_8));
+
+        mqttClient.publish( iotProperties.getMqtt().getPublishTopic(), mqttResponseMessage );
     }
 
     private IMqttClient mqttClient() throws MqttException {
