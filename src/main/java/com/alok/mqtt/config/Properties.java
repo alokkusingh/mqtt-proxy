@@ -36,11 +36,18 @@ public class Properties {
 
         private String keystoreType;
 
+        private FilePathType keystoreFilePathType;
         private String keystoreFile;
         private String keystorePassword;
 
+        private FilePathType truststoreFilePathType;
         private String truststoreFile;
         private String truststorePassword;
 
+    }
+
+    public enum FilePathType {
+        ABSOLUTE,
+        RESOURCE
     }
 }

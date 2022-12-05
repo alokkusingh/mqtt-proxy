@@ -116,9 +116,15 @@ public class MqttClientService {
         //valid properties are {"com.ibm.ssl.protocol", "com.ibm.ssl.contextProvider", "com.ibm.ssl.keyStore", "com.ibm.ssl.keyStorePassword", "com.ibm.ssl.keyStoreType", "com.ibm.ssl.keyStoreProvider", "com.ibm.ssl.keyManager", "com.ibm.ssl.trustStore", "com.ibm.ssl.trustStorePassword", "com.ibm.ssl.trustStoreType", "com.ibm.ssl.trustStoreProvider", "com.ibm.ssl.trustManager", "com.ibm.ssl.enabledCipherSuites", "com.ibm.ssl.clientAuthentication"};
         java.util.Properties properties = new java.util.Properties();
         properties.setProperty("com.ibm.ssl.keyStoreType", iotProperties.getSecure().getKeystoreType());
-        properties.setProperty("com.ibm.ssl.keyStore", CertUtils.getClientKeyStore(iotProperties.getSecure().getKeystoreFile()));
+        properties.setProperty("com.ibm.ssl.keyStore", iotProperties.getSecure().getKeystoreFilePathType() == Properties.FilePathType.ABSOLUTE?
+                        iotProperties.getSecure().getKeystoreFile()
+                        :CertUtils.getClientKeyStore(iotProperties.getSecure().getKeystoreFile())
+        );
         properties.setProperty("com.ibm.ssl.keyStorePassword", iotProperties.getSecure().getKeystorePassword());
-        properties.setProperty("com.ibm.ssl.trustStore", CertUtils.getClientTrustStore(iotProperties.getSecure().getTruststoreFile()));
+        properties.setProperty("com.ibm.ssl.trustStore", iotProperties.getSecure().getTruststoreFilePathType() == Properties.FilePathType.ABSOLUTE?
+                iotProperties.getSecure().getTruststoreFile()
+                :CertUtils.getClientTrustStore(iotProperties.getSecure().getTruststoreFile())
+        );
         properties.setProperty("com.ibm.ssl.trustStorePassword", iotProperties.getSecure().getTruststorePassword());
         return properties;
     }
