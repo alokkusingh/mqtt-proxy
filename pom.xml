@@ -97,9 +97,9 @@ Note: "github" repository definition is present in setting.xml
 -->
 	<distributionManagement>
 		<repository>
-			<id>mqtt-proxy</id>
+			<id>2-github</id>
 			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/alokkusingh/mqtt-proxy</url>
+			<url>https://maven.pkg.github.com/alokkusingh/mvn-repo</url>
 		</repository>
 	</distributionManagement>
 
